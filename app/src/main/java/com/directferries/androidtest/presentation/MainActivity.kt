@@ -5,24 +5,55 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.viewModels
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.directferries.androidtest.R
+import com.directferries.androidtest.data.CarEntity
+import com.directferries.androidtest.databinding.ActivityMainBinding
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_view_car.view.*
+import javax.inject.Inject
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : DaggerAppCompatActivity() {
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private val viewModel by viewModels<MainViewModel> { viewModelFactory }
+
+    private lateinit var binding: ActivityMainBinding
+
+    private lateinit var listAdapter: CarsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        val model: MainViewModel by viewModels()
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        cars_recycler.layoutManager = LinearLayoutManager(this)
-        val adapter = Adapter
-        cars_recycler.adapter = adapter
-        adapter.listItems = model.getCars().value?.toMutableList() ?: mutableListOf()
+        binding.viewModel = viewModel
+
+        // Set the lifecycle owner to the lifecycle of the view
+        binding.lifecycleOwner = this
+
+        setupListAdapter()
+        subscribeUi(listAdapter)
+
+        viewModel.loadCars()
+    }
+
+    private fun subscribeUi(adapter: CarsAdapter) {
+        viewModel.cars.observe(this) { cars ->
+            adapter.submitList(cars)
+        }
+    }
+
+    private fun setupListAdapter() {
+        listAdapter = CarsAdapter()
+        binding.carsRecycler.adapter = listAdapter
     }
 
     object Adapter : RecyclerView.Adapter<Holder>() {
