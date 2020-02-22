@@ -1,14 +1,13 @@
 package com.directferries.androidtest.domain
 
-import com.directferries.androidtest.data.CarRepository
-import com.directferries.androidtest.presentation.CarEntity
+import com.directferries.androidtest.data.DefaultCarRepository
+import javax.inject.Inject
 
-class GetCarsUseCase (
-    private val repository:CarRepository
+/* This example use case is very simple, but all business logic to be applied after retrieving
+ the cars.json from the repository should be placed in this class
+ */
+class GetCarsUseCase @Inject constructor(
+    private val repository: DefaultCarRepository
 ) {
-    fun getCars() : List<CarEntity> {
-        return repository.getCars().map {
-            CarEntity(it.make, it.model, it.id)
-        }
-    }
+    suspend fun getCars() = repository.getCars()
 }

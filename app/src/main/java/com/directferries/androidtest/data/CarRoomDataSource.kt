@@ -1,7 +1,7 @@
 package com.directferries.androidtest.data
 
-class CarRoomDataSource : CarDataSource {
+object CarRoomDataSource : CarDataSource {
     override fun getCars(): List<CarEntity>? {
-        TODO("not implemented")
+        return null
     }
 }
